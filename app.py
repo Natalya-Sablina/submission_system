@@ -159,6 +159,7 @@ def index():
             effective_topic_name = sub_topic
             group = None
             participant_number = None
+
         else:
             base_topic = selected_topic
             # Папка: uploads/Выбранная_тема/
@@ -189,6 +190,8 @@ def index():
                 participant_number = request.form.get("participant_number", "").strip()
                 if not participant_number:
                     participant_number = "0"
+                # Создаём подпапку с номером участника
+                topic_folder = os.path.join(topic_folder, f"Участник_{participant_number}")
 
         # Создаём папку (если её нет)
         os.makedirs(topic_folder, exist_ok=True)
@@ -274,4 +277,11 @@ if __name__ == "__main__":
     # host='0.0.0.0' — делает сервер доступным в локальной сети
     # port=5000 — стандартный порт
     # debug=True — автоматический перезапуск при изменении кода
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = 5000
+    # Проверяем, передан ли порт через командную строку
+    if len(sys.argv) > 1 and sys.argv[1].startswith('--port='):
+        try:
+            port = int(sys.argv[1].split('=')[1])
+        except:
+            pass
+    app.run(host='0.0.0.0', port=port, debug=True)

@@ -631,23 +631,49 @@
     </div>
 
     <script>
-        // ============================================================
-        // 1. ТЁМНАЯ ТЕМА (сохраняется в localStorage)
-        // ============================================================
+        // ====================================================================
+        // 1. ТЁМНАЯ ТЕМА (сохраняется в КУКИ - работает даже при смене порта)
+        // ====================================================================
         const body = document.body;
-        const savedTheme = localStorage.getItem("theme");
-            
+
+        // Функция для установки куки
+        function setCookie(name, value, days = 365) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+        }
+
+        // Функция для получения куки
+        function getCookie(name) {
+            const matches = document.cookie.match(new RegExp(
+                "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            ));
+            return matches ? decodeURIComponent(matches[1]) : undefined;
+        }
+
+        // Проверяем сохранённую тему (сначала куки, потом localStorage для совместимости)
+        let savedTheme = getCookie("theme");
+        if (!savedTheme) {
+            // Если в куки нет, проверяем localStorage (старые версии)
+            savedTheme = localStorage.getItem("theme");
+            if (savedTheme) {
+                // Переносим в куки
+                setCookie("theme", savedTheme);
+                localStorage.removeItem("theme"); // чистим старое
+            }
+        }
+
         if (savedTheme === "dark") {
             body.classList.add("dark");
         }
-        
+
         function toggleTheme() {
             body.classList.toggle("dark");
-            if (body.classList.contains("dark")) {
-                localStorage.setItem("theme", "dark");
-            } else {
-                localStorage.setItem("theme", "light");
-            }
+            const newTheme = body.classList.contains("dark") ? "dark" : "light";
+            // Сохраняем в куки (на 365 дней)
+            setCookie("theme", newTheme);
+            // Для обратной совместимости сохраняем и в localStorage
+            localStorage.setItem("theme", newTheme);
         }
         
         // ============================================================
