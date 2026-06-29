@@ -23,6 +23,9 @@ if errorlevel 1 (
     start /wait python_installer.exe InstallAllUsers=1 PrependPath=1 Include_test=0 SimpleInstall=1
     del python_installer.exe
     echo Python 3.14.5 успешно установлен!
+    
+    :: КРИТИЧЕСКИЙ ШАГ: Принудительно обновляем пути внутри этой сессии, чтобы не закрывать окно
+    set "PATH=%ProgramFiles%\Python314\;%ProgramFiles%\Python314\Scripts\;%PATH%"
 ) else (
     echo Python уже установлен.
 )
@@ -55,8 +58,6 @@ if not exist "venv" (
     echo Виртуальное окружение уже существует.
 )
 
-call venv\Scripts\activate.bat
-
 :: -------------------------------------------------------------------
 :: 4. УСТАНОВКА ЗАВИСИМОСТЕЙ
 :: -------------------------------------------------------------------
@@ -69,8 +70,9 @@ if not exist "requirements.txt" (
     echo markupsafe >> requirements.txt
 )
 
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+:: Вместо нестабильного 'call venv...' используем прямые железные пути к venv
+"venv\Scripts\python.exe" -m pip install --upgrade pip
+"venv\Scripts\pip.exe" install -r requirements.txt
 
 :: -------------------------------------------------------------------
 :: 5. ЗАПУСК СЕРВЕРА С ВЫБРАННЫМ ПОРТОМ
@@ -79,7 +81,7 @@ echo.
 echo [5/5] Запуск сервера на порту %PORT%...
 echo.
 
-start /b python app.py --port=%PORT%
+start /b "" "venv\Scripts\python.exe" app.py --port=%PORT%
 
 timeout /t 3 /nobreak >nul
 
@@ -105,6 +107,6 @@ echo Открытие браузера...
 start http://localhost:%PORT%
 
 echo.
-echo Чтобы остановить сервер, закрой это окно.
+echo Чтобы остановить сервер, закройте это окно.
 echo.
 pause

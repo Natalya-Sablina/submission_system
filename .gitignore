@@ -1,0 +1,20 @@
+# Окружение Python
+venv/
+__pycache__/
+*.pyc
+
+# Сборка и дистрибутивы (PyInstaller и др.)
+build/
+dist/
+*.spec
+
+# Настройки редакторов кода
+.vscode/
+.idea/
+
+# Мусорные файлы операционных систем
+.DS_Store
+Thumbs.db
+
+# Заметки Obsidian
+.obsidian
